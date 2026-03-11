@@ -98,9 +98,3 @@ xgb = XGBRegressor(
 )
 
 evaluate_model(xgb, X_train, y_train, X_val, y_val, "XGBoost")
-
-# ── Quick comparison table (manual for now) ──────────────────────
-print("\nQuick Summary:")
-print("Model              | Val MAE     | Val RMSE    | Val R²")
-print("---------------------------------------------------------")
-# You can fill this manually after running, or collect in a dict later
