@@ -110,10 +110,10 @@ python Model_V2.py
 
 | Model | Val MAE | Val RMSE | Val R² |
 |---|---|---|---|
-| Linear Regression | — | — | — |
-| Random Forest | — | — | — |
-| XGBoost (baseline) | — | — | — |
-| XGBoost (tuned) | — | — | — |
+| Linear Regression | $230,979 | $1,215,847 | -2.7216 |
+| Random Forest | $173,454 | $283,223 | 0.7981 |
+| XGBoost (baseline) | $154,121 | $248,471 | 0.8446 |
+| XGBoost (tuned) | $156,618 | $254,173 | 0.8374 |
 
 > Fill in after running the scripts.
 
