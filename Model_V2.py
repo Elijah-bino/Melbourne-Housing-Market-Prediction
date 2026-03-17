@@ -97,6 +97,11 @@ top_features = importances.sort_values(ascending=False).head(15)
 print("\nTop 15 Feature Importances:")
 print(top_features)
 
+import joblib
+joblib.dump(xgb_tuned.best_estimator_, "xgb_tuned_model.pkl")
+joblib.dump(list(X_train.columns), "feature_columns.pkl")   # saves the exact column order
+print("✅ Model and columns saved!")
+
 # Plot
 plt.figure(figsize=(10, 6))
 top_features.plot(kind='barh', color='skyblue')
