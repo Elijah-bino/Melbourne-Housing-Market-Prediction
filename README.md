@@ -1,139 +1,125 @@
 # 🏠 Melbourne House Price Prediction
 
-A machine learning project to predict residential property prices in Melbourne, Australia. The pipeline covers end-to-end data wrangling, feature engineering, and model training — comparing Linear Regression, Random Forest, and XGBoost regressors.
+**End-to-end Machine Learning Project** — predicting residential property prices in Melbourne, Australia using real sales data from Domain.com.au (~13,580 records).
+
+This project demonstrates a complete ML pipeline: **data cleaning → advanced feature engineering → model development → hyperparameter tuning → deployment**.
+
+---
+
+## 🚀 Live Interactive Demo
+
+Try the model instantly in your browser — no installation required:
+
+[![Open in Hugging Face](https://huggingface.co/spaces/Elijahbino/Melbourne-house-price-predictor)
+
+**Features of the app:**
+- Real-time price prediction using tuned XGBoost
+- Sliders + dropdowns (Suburb, Type, Region, Council Area, Rooms, Distance, etc.)
+- Realistic price range shown (± model error)
+- Clean, professional interface
+
+<img width="2842" height="1568" alt="image" src="https://github.com/user-attachments/assets/feabfb72-e2d1-456a-8244-998cd1d7d7c0" />
 
 ---
 
 ## 📁 Project Structure
 
 ```
-├── Raw_data.csv           # Original Melbourne housing dataset (~13,580 records)
-├── cleaned_data.csv       # Processed & encoded dataset ready for modeling
-├── data_wrangling.py      # Data cleaning, imputation, and feature engineering
-├── Model_V1.py            # Baseline model comparison (LR, RF, XGBoost)
-└── Model_V2.py            # XGBoost with hyperparameter tuning & feature importance
+Melbourne Housing Market Prediction/
+├── app.py                        # Gradio web application (deployed on Hugging Face)
+├── requirements.txt              # All dependencies
+├── xgb_tuned_model.pkl           # Final tuned XGBoost model
+├── feature_columns.pkl           # Feature column order
+├── suburb_to_encoded.pkl         # Suburb target-encoding mapping
+├── Raw_data.csv                  # Original Kaggle dataset
+├── cleaned_data.csv              # Processed & encoded data
+├── data_wrangling.py             # Full data cleaning & feature engineering
+├── Model_V1.py                   # Baseline models (Linear, Random Forest, XGBoost)
+├── Model_V2.py                   # Hyperparameter tuning + feature importance
+└── README.md
 ```
 
 ---
 
-## 📊 Dataset
+## 🔧 What We Built – Complete Pipeline:
 
-The raw dataset contains **13,580 Melbourne property listings** with 21 features including:
+### 1. Data Wrangling & Cleaning (`data_wrangling.py`)
+- Identified and handled missing values (BuildingArea 47.5%, YearBuilt 39.6%, CouncilArea 10%)
+- **Smart group-wise imputation**:
+  - Car → median
+  - CouncilArea → suburb-level mode mapping
+  - YearBuilt → suburb-level median
+  - BuildingArea → median grouped by `Type` + `Rooms`
+- Added **missing value indicator flags** (`BuildingArea_was_missing`, `YearBuilt_was_missing`) — very useful for tree models
+- Created new feature: `Age = 2025 - YearBuilt` (clipped 0–300 years)
+- Dropped noisy/redundant columns (`Address`, `SellerG`, `Postcode`, `Bedroom2`, `Date`, coordinates)
 
-| Feature | Description |
-|---|---|
-| `Suburb` | Property suburb |
-| `Rooms` | Number of rooms |
-| `Type` | Property type (house, unit, townhouse) |
-| `Price` | Sale price (target variable) |
-| `Distance` | Distance from Melbourne CBD (km) |
-| `Bathroom`, `Car` | Number of bathrooms / car spaces |
-| `Landsize`, `BuildingArea` | Property dimensions (m²) |
-| `YearBuilt` | Year of construction |
-| `CouncilArea`, `Regionname` | Administrative region |
+### 2. Encoding & Preprocessing
+- **Target Encoding** for high-cardinality `Suburb` (314 unique values)
+- One-Hot Encoding for low-cardinality categoricals (`Type`, `Method`, `CouncilArea`, `Regionname`)
+- Log transformation on target (`log1p(Price)`) to handle right-skewness
 
----
+### 3. Modeling (`Model_V1.py` & `Model_V2.py`)
+- Baseline comparison:
+  - Linear Regression (with scaling)
+  - Random Forest Regressor
+  - XGBoost Regressor
+- Hyperparameter tuning using `RandomizedSearchCV` (20 iterations)
+- Evaluation on log scale + inverse transform for real-dollar metrics (MAE, RMSE, R²)
+- Feature importance analysis
 
-## 🔧 Pipeline Overview
+**Final Model Performance (Validation Set)**
 
-### 1. Data Wrangling (`data_wrangling.py`)
+| Model                  | MAE          | RMSE         | R²     |
+|------------------------|--------------|--------------|--------|
+| Linear Regression      | $230,979    | $1,215,847  | -2.72 |
+| Random Forest          | $173,454    | $283,223    | 0.798 |
+| XGBoost (baseline)     | $154,121    | $248,471    | 0.845 |
+| **XGBoost (tuned)**    | **$156,618** | **$254,173** | **0.837** |
 
-**Missing value imputation:**
-- `Car` → median fill
-- `CouncilArea` → suburb-level mode mapping, fallback to global mode
-- `YearBuilt` → suburb-level median, fallback to global median
-- `BuildingArea` → median grouped by `Type` + `Rooms`, fallback to global median
-- Missing indicator flags added for `BuildingArea` and `YearBuilt` (useful for tree models)
-
-**Feature engineering:**
-- `Age` = `2025 − YearBuilt` (clipped to 0–300)
-- Dropped redundant/noisy columns: `Address`, `SellerG`, `Postcode`, `Bedroom2`, `Date`, `Lattitude`, `Longtitude`
-
-**Encoding:**
-- `Suburb` (high cardinality) → Target Encoding
-- `Type`, `Method`, `CouncilArea`, `Regionname` (low cardinality) → One-Hot Encoding (drop-first)
-- Numerical features → passed through as-is
-
----
-
-### 2. Baseline Modeling (`Model_V1.py`)
-
-Three models evaluated on an 80/20 train-validation split with **log-transformed target** (`log1p(Price)`):
-
-- **Linear Regression** (with StandardScaler)
-- **Random Forest** (100 trees, max depth 10)
-- **XGBoost** (200 estimators, lr=0.1, max depth 6)
-
-Metrics reported: MAE, RMSE, R², and 5-fold cross-validation MAE.
+### 4. Deployment
+- Built interactive **Gradio web app** with intuitive sliders and dropdowns
+- Deployed publicly on **Hugging Face Spaces** (permanent, shareable link)
+- Added realistic prediction range (± MAE ≈ $157k) for transparency
 
 ---
 
-### 3. Tuned XGBoost (`Model_V2.py`)
+## 🛠️ Tech Stack
 
-Builds on V1 with `RandomizedSearchCV` (20 iterations, 3-fold CV) tuning over:
-
-```
-n_estimators, learning_rate, max_depth,
-subsample, colsample_bytree, min_child_weight, gamma
-```
-
-Also generates a **top-15 feature importance chart** from the best estimator.
+- **Data Manipulation**: pandas, numpy
+- **Modeling**: scikit-learn, XGBoost, joblib
+- **Encoding**: category_encoders (TargetEncoder)
+- **Web App**: Gradio
+- **Deployment**: Hugging Face Spaces
+- **Visualization**: matplotlib, seaborn
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
+## 🚀 How to Run Locally
 
 ```bash
-pip install pandas numpy scikit-learn xgboost category_encoders matplotlib seaborn
+# 1. Clone the repository
+git clone https://github.com/Elijahbino/Melbourne-Housing-Market-Prediction.git
+cd Melbourne-Housing-Market-Prediction
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Launch the interactive app
+python app.py
 ```
 
-### Run the pipeline
-
-```bash
-# Step 1 — clean and encode the raw data
-python data_wrangling.py
-
-# Step 2 — train and compare baseline models
-python Model_V1.py
-
-# Step 3 — tune XGBoost and inspect feature importances
-python Model_V2.py
-```
-
-> Make sure `Raw_data.csv` is in the same directory before running `data_wrangling.py`. The script will produce `cleaned_data.csv`, which is required by both model scripts.
+Open http://localhost:7860 in your browser.
 
 ---
 
-## 📈 Model Comparison
-
-| Model | Val MAE | Val RMSE | Val R² |
-|---|---|---|---|
-| Linear Regression | $230,979 | $1,215,847 | -2.7216 |
-| Random Forest | $173,454 | $283,223 | 0.7981 |
-| XGBoost (baseline) | $154,121 | $248,471 | 0.8446 |
-| XGBoost (tuned) | $156,618 | $254,173 | 0.8374 |
-
-> Fill in after running the scripts.
+Made with ❤️ in Melbourne, Australia  
+Last updated: March 2026
 
 ---
 
-## 🔍 Key Design Decisions
+**Live Demo**: https://huggingface.co/spaces/Elijahbino/Melbourne-house-price-predictor
 
-- **Log-transformed target:** House prices are right-skewed; `log1p(Price)` stabilises variance and improves model fit. Predictions are inverse-transformed with `expm1` for reporting.
-- **Missing indicators:** Binary flags for imputed `BuildingArea` and `YearBuilt` let tree models learn if missingness itself is informative.
-- **Target encoding for `Suburb`:** With hundreds of suburbs, one-hot encoding would create excessive dimensionality. Target encoding maps each suburb to its mean target value, conditioned on the training set.
-- **Group-level imputation:** Using suburb/type/room group medians preserves local pricing signals rather than collapsing to global statistics.
+Just say the word and we’ll keep going! 
 
----
-
-## 📦 Dependencies
-
-| Package | Purpose |
-|---|---|
-| `pandas`, `numpy` | Data manipulation |
-| `scikit-learn` | Preprocessing, modeling, evaluation |
-| `xgboost` | Gradient boosting regressor |
-| `category_encoders` | Target encoding for high-cardinality categoricals |
-| `matplotlib`, `seaborn` | Visualisation |
+You’ve built something really impressive — well done! 🏆
