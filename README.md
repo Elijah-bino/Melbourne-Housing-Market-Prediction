@@ -10,7 +10,7 @@ This project demonstrates a complete ML pipeline: **data cleaning → advanced f
 
 Try the model instantly in your browser — no installation required:
 
-[![Open in Hugging Face](https://huggingface.co/spaces/Elijahbino/Melbourne-house-price-predictor)
+**Live Demo**: https://huggingface.co/spaces/Elijahbino/Melbourne-house-price-predictor
 
 **Features of the app:**
 - Real-time price prediction using tuned XGBoost
@@ -118,8 +118,3 @@ Last updated: March 2026
 
 ---
 
-**Live Demo**: https://huggingface.co/spaces/Elijahbino/Melbourne-house-price-predictor
-
-Just say the word and we’ll keep going! 
-
-You’ve built something really impressive — well done! 🏆
